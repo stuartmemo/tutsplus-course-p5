@@ -1,66 +1,75 @@
 var bubbles = [],
     totalBubbles = 80;
 
+var backgroundColor = '#FBE571';
+
 function setup() {
     createCanvas(window.innerWidth, window.innerHeight);
+    background(backgroundColor);
 
     for (var i = 0; i < totalBubbles; i++) {
         bubbles.push({
-            x: random(width),
-            y: height + 100,
-            diameter: random(50, 100),
+            x: random(0, width),
+            y: height + 200,
+            diameter: random(50, 120),
             speed: random(1, 10),
-            popped: false,
-            opacity: 1
+            offset: 0,
+            textOpacity: 1
         });
     }
 }
 
 function draw() {
-    background('#FBE571');
+    background(backgroundColor);
     drawBubble();
 }
 
 function drawBubble() {
+
     bubbles.forEach(function (bubble) {
-        if (bubble.y < -100) {
-            bubble.y = height + 100;
+        if (bubble.offset > height + 400) {
+            bubble.offset = 0;
         }
+
+        bubble.offset = bubble.offset + bubble.speed;
 
         if (bubble.popped) {
-            noStroke();
-            fill('rgba(0, 0, 0, ' + bubble.opacity + ')');
-
+            fill('rgba(0, 0, 0, ' + bubble.textOpacity + ')');
             textSize(24);
             textAlign(CENTER);
-            text('*pop*', bubble.x, bubble.y);
+            text('*pop*', bubble.x, bubble.y - bubble.offset);
 
-            if (bubble.opacity > 0.1) {
-                bubble.opacity = bubble.opacity - 0.01;
+            if (bubble.textOpacity > 0.01) {
+                bubble.textOpacity = bubble.textOpacity - 0.01;
             } else {
-                bubble.opacity = 0;
+                bubble.textOpacity = 0;
             }
         } else {
+            // Draw bubble.
+            fill('lightblue');
             stroke('white');
-            fill('#CABFE2');
-            bubble.y = bubble.y - bubble.speed;
-            ellipse(bubble.x, bubble.y, bubble.diameter, bubble.diameter);
-            addShine(bubble);
+            strokeWeight(1);
+            ellipse(bubble.x, bubble.y - bubble.offset, bubble.diameter, bubble.diameter);
+
+            // Draw shine.
+            fill('white');
+            ellipse(
+                bubble.x + (bubble.diameter * 0.2),
+                bubble.y - (bubble.diameter * 0.25) - bubble.offset,
+                bubble.diameter / 8,
+                bubble.diameter / 8
+            );
+
+            fill('lightblue');
+            noStroke();
+            ellipse(
+                bubble.x + (bubble.diameter * 0.15),
+                bubble.y - (bubble.diameter * 0.2) - bubble.offset,
+                bubble.diameter / 8,
+                bubble.diameter / 8
+            );
         }
     });
-}
-
-function addShine(bubble) {
-    var shinelength = bubble.diameter / 16,
-        xOffset = bubble.diameter / 8,
-        yOffset = -bubble.diameter / 3;
-
-    line(
-        bubble.x + xOffset,
-        bubble.y + yOffset,
-        bubble.x + (2 * xOffset),
-        bubble.y + yOffset + shinelength + 2
-    );
 }
 
 function wasClickInsideBubble(bubble) {
@@ -69,8 +78,8 @@ function wasClickInsideBubble(bubble) {
     if (
         (mouseX > bubble.x - bubbleRadius) &&
         (mouseX < bubble.x + bubbleRadius) &&
-        (mouseY > bubble.y - bubbleRadius) &&
-        (mouseY < bubble.y + bubbleRadius)
+        (mouseY > bubble.y - bubble.offset - bubbleRadius) &&
+        (mouseY < bubble.y - bubble.offset + bubbleRadius)
     ) {
         return true;
     } else {
